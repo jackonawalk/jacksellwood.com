@@ -8,6 +8,10 @@ const navItems: { [key: string]: { name: string; target?: string } } = {
     name: "grapple",
     target: "_blank",
   },
+  "https://cv.jacksellwood.com": {
+    name: "cv",
+    target: "_blank",
+  },
 };
 
 export function Navbar() {
