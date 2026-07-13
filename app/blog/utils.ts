@@ -53,6 +53,62 @@ export function getBlogPosts() {
   return getMDXData(path.join(process.cwd(), 'app', 'blog', 'posts'))
 }
 
+function getQuarterKey(date: Date) {
+  const quarter = Math.floor(date.getMonth() / 3) + 1
+  return `${date.getFullYear()}-Q${quarter}`
+}
+
+function getQuarterStart(date: Date) {
+  const quarterStartMonth = Math.floor(date.getMonth() / 3) * 3
+  return new Date(date.getFullYear(), quarterStartMonth, 1)
+}
+
+export function getQuarterlyPostCounts() {
+  const posts = getBlogPosts()
+  const now = new Date()
+
+  if (posts.length === 0) {
+    return []
+  }
+
+  const dates = posts.map((post) => {
+    const publishedAt = post.metadata.publishedAt
+    return new Date(
+      publishedAt.includes('T') ? publishedAt : `${publishedAt}T00:00:00`,
+    )
+  })
+
+  const oldest = dates.reduce((min, date) => (date < min ? date : min))
+  const start = getQuarterStart(oldest)
+  const buckets: { key: string; label: string; count: number }[] = []
+
+  const cursor = new Date(start)
+  while (cursor <= now) {
+    const quarter = Math.floor(cursor.getMonth() / 3) + 1
+    const key = `${cursor.getFullYear()}-Q${quarter}`
+    buckets.push({
+      key,
+      label: `Q${quarter} '${String(cursor.getFullYear()).slice(2)}`,
+      count: 0,
+    })
+    cursor.setMonth(cursor.getMonth() + 3)
+  }
+
+  for (const post of posts) {
+    const publishedAt = post.metadata.publishedAt
+    const date = new Date(
+      publishedAt.includes('T') ? publishedAt : `${publishedAt}T00:00:00`,
+    )
+    const key = getQuarterKey(date)
+    const bucket = buckets.find((b) => b.key === key)
+    if (bucket) {
+      bucket.count++
+    }
+  }
+
+  return buckets
+}
+
 export function formatDate(date: string, includeRelative = false) {
   let currentDate = new Date()
   if (!date.includes('T')) {
