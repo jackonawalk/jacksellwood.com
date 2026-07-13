@@ -16,7 +16,6 @@
     "next": "15.5.20",
     "next-mdx-remote": "^6.0.0",
     "postcss": "8.5.19",
-    "posthog-js": "^1.202.5",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "sugar-high": "^0.6.0",
